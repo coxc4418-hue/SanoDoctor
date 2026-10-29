@@ -285,6 +285,7 @@ export function bmi(vitals = {}) {
   const w = n(vitals.peso); const h = n(vitals.talla);
   if (!w || !h) return null;
   const m = h > 3 ? h / 100 : h;
+  if (m < 0.4 || m > 2.5 || w > 400) return null; // dato mal escrito: lo avisa vitalAlerts
   const v = Math.round((w / (m * m)) * 10) / 10;
   const cat = v < 18.5 ? ['Bajo peso', 'warning'] : v < 25 ? ['Peso normal', 'success'] : v < 30 ? ['Sobrepeso', 'warning'] : v < 35 ? ['Obesidad grado I', 'danger'] : v < 40 ? ['Obesidad grado II', 'danger'] : ['Obesidad grado III', 'danger'];
   return { value: v, label: cat[0], tone: cat[1] };
@@ -310,6 +311,8 @@ export function vitalAlerts(v = {}, age = null) {
   const t = n(v.temp); if (t != null) { if (t >= 39) out.push({ k: 'temp', text: `Fiebre alta (${t} °C)`, tone: 'danger' }); else if (t >= 38) out.push({ k: 'temp', text: `Fiebre (${t} °C)`, tone: 'warning' }); else if (t >= 37.5) out.push({ k: 'temp', text: `Febrícula (${t} °C)`, tone: 'warning' }); else if (t < 35.5) out.push({ k: 'temp', text: `Hipotermia (${t} °C)`, tone: 'danger' }); }
   const s = n(v.sat); if (s != null) { if (s < 90) out.push({ k: 'sat', text: `Saturación muy baja (${s}%)`, tone: 'danger' }); else if (s < 94) out.push({ k: 'sat', text: `Saturación baja (${s}%)`, tone: 'warning' }); }
   const g = n(v.glucemia); if (g != null) { if (g < 70) out.push({ k: 'glucemia', text: `Hipoglicemia (${g} mg/dl)`, tone: 'danger' }); else if (g >= 250) out.push({ k: 'glucemia', text: `Hiperglicemia severa (${g} mg/dl)`, tone: 'danger' }); else if (g >= 180) out.push({ k: 'glucemia', text: `Hiperglicemia (${g} mg/dl)`, tone: 'warning' }); }
+  const h = n(v.talla); if (h != null && ((h > 3 ? h / 100 : h) < 0.4 || (h > 3 ? h / 100 : h) > 2.5)) out.push({ k: 'talla', text: `Revisa la talla (${v.talla} cm)`, tone: 'warning' });
+  const w = n(v.peso); if (w != null && (w <= 0 || w > 400)) out.push({ k: 'peso', text: `Revisa el peso (${v.peso} kg)`, tone: 'warning' });
   const b = bmi(v); if (b && b.tone !== 'success') out.push({ k: 'imc', text: `IMC ${b.value}: ${b.label}`, tone: b.tone });
   return out;
 }

@@ -1,0 +1,132 @@
+{
+  "id": "/",
+  "name": "Sano Doctor — Gestión médica para tu consultorio",
+  "short_name": "Sano Doctor",
+  "description": "Agenda de citas, historia clínica, récipes con vademécum, reposos y constancias con QR verificable, cobros en $ y Bs, caja, insumos y reportes para médicos y consultorios.",
+  "start_url": "/?source=app",
+  "scope": "/",
+  "display": "standalone",
+  "launch_handler": {
+    "client_mode": "focus-existing"
+  },
+  "orientation": "any",
+  "background_color": "#050d12",
+  "theme_color": "#062a2a",
+  "lang": "es",
+  "dir": "ltr",
+  "categories": [
+    "medical",
+    "business",
+    "productivity"
+  ],
+  "icons": [
+    {
+      "src": "/assets/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/icon-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Agenda de hoy",
+      "short_name": "Agenda",
+      "url": "/#/agenda",
+      "icons": [
+        {
+          "src": "/assets/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Pacientes",
+      "short_name": "Pacientes",
+      "url": "/#/pacientes",
+      "icons": [
+        {
+          "src": "/assets/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Consultas",
+      "short_name": "Consultas",
+      "url": "/#/consultas",
+      "icons": [
+        {
+          "src": "/assets/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Cobrar",
+      "short_name": "Cobrar",
+      "url": "/#/cobrar",
+      "icons": [
+        {
+          "src": "/assets/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/assets/screens/pc-inicio.png",
+      "sizes": "1280x800",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "El día del consultorio de un vistazo"
+    },
+    {
+      "src": "/assets/screens/pc-agenda.png",
+      "sizes": "1280x800",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Agenda con sala de espera"
+    },
+    {
+      "src": "/assets/screens/pc-consulta.png",
+      "sizes": "1280x800",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Consulta: récipe con vademécum"
+    },
+    {
+      "src": "/assets/screens/movil-inicio.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Resumen del día"
+    },
+    {
+      "src": "/assets/screens/movil-agenda.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Agenda desde el teléfono"
+    },
+    {
+      "src": "/assets/screens/movil-paciente.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Historia clínica del paciente"
+    }
+  ]
+}

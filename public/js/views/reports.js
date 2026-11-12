@@ -144,12 +144,12 @@ export function mount(el) {
     const c = compute();
     const tbl = (rows, f = (v) => v) => `<table><tbody>${rows.map(([k, v]) => `<tr><td>${esc(k)}</td><td class="r">${f(v)}</td></tr>`).join('') || '<tr><td>Sin datos</td></tr>'}</tbody></table>`;
     printDoc(`Reporte del ${fmtDate(from)} al ${fmtDate(to)}`, `
-      <div class="kpis"><div class="kpi">Consultas<b>${c.consults.length}</b></div><div class="kpi">Pacientes atendidos<b>${c.patients.size}</b></div><div class="kpi">Pacientes nuevos<b>${data.newPts.length}</b></div><div class="kpi">Facturado<b>$${num(c.billed)}</b></div><div class="kpi">Cobrado<b>$${num(c.cash)}</b></div><div class="kpi">Inasistencia<b>${num(c.noShowRate, 0)}%</b></div></div>
+      <div class="kpis"><div class="kpi">Consultas<b>${c.consults.length}</b></div><div class="kpi">Pacientes atendidos<b>${c.patients.size}</b></div><div class="kpi">Pacientes nuevos<b>${data.newPts.length}</b></div><div class="kpi">Facturado<b>${usd(c.billed)}</b></div><div class="kpi">Cobrado<b>${usd(c.cash)}</b></div><div class="kpi">Inasistencia<b>${num(c.noShowRate, 0)}%</b></div></div>
       <h2>Diagnósticos más frecuentes</h2>${tbl(top(c.dx, 15))}
       <h2>Medicamentos más indicados</h2>${tbl(top(c.meds, 10))}
       <h2>Tipos de consulta</h2>${tbl(top(c.types))}
       <h2>Pacientes por edad</h2>${tbl(Object.entries(c.ages))}
-      <h2>Formas de pago</h2>${tbl(Object.entries(c.methods).filter(([, v]) => Math.abs(v) > 0.004).map(([k, v]) => [methodLabel(k), v]), (v) => '$' + num(v))}`);
+      <h2>Formas de pago</h2>${tbl(Object.entries(c.methods).filter(([, v]) => Math.abs(v) > 0.004).map(([k, v]) => [methodLabel(k), v]), (v) => usd(v))}`);
   };
   setRange('30');
   return null;

@@ -1,7 +1,7 @@
 // Sano Doctor — Operaciones: pacientes, citas, consultas, documentos, cobros, caja e insumos
 import { auth } from './firebase.js';
 import { store, APPT_TYPES, APPT_STATUS, ACTIVE_APPT } from './store.js';
-import { round2, round4, nowISO, todayKey, dayKey, PAY_METHODS, shortId, addDays } from './utils.js';
+import { round2, round4, nowISO, todayKey, dayKey, PAY_METHODS, shortId, addDays, isVE, usd } from './utils.js';
 import { ageOf } from './clinical.js';
 
 export const APP_URL = 'https://sano-doctor.web.app';
@@ -68,13 +68,14 @@ function shiftIncrements(flow, extra = {}) {
   return u;
 }
 function preparePayment({ amount, payments, changeCurrency = 'BS' }) {
+  if (!isVE()) changeCurrency = 'USD';
   const rate = store.rate;
   if (!(rate > 0)) throw new Error('Configura la tasa del día antes de cobrar.');
   const shift = store.openShift;
   if (!shift) throw new Error('Abre la caja antes de cobrar (menú Caja).');
   const pays = normalizePays(payments, rate);
   const paidUSD = round4(pays.reduce((a, p) => a + p.usd, 0));
-  if (paidUSD < amount - 0.01) throw new Error(`Falta por cobrar $${round2(amount - paidUSD).toFixed(2)}.`);
+  if (paidUSD < amount - 0.01) throw new Error(`Falta por cobrar ${usd(amount - paidUSD)}.`);
   const changeUSD = round2(Math.max(0, paidUSD - amount));
   const flow = cashFlowOf(pays, changeUSD, changeCurrency, rate);
   return { rate, shift, pays, paidUSD, changeUSD, changeCurrency, flow, received: round2(paidUSD - changeUSD) };

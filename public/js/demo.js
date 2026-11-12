@@ -9,7 +9,7 @@ import { ageOf } from './clinical.js';
 /** PIN de administrador de todas las demos (se muestra en pantalla) */
 export const DEMO_PIN = '1234';
 export const DEMO_MINUTES = 30;
-const DATA_COLLECTIONS = ['patients', 'appointments', 'consultations', 'files', 'products', 'sales', 'cash_shifts', 'cash_movements', 'inventory_logs', 'config'];
+export const DATA_COLLECTIONS = ['patients', 'appointments', 'consultations', 'files', 'products', 'sales', 'cash_shifts', 'cash_movements', 'inventory_logs', 'config'];
 const BIZ = 'Centro Médico Salud Plena (demo)';
 
 export async function startDemo() { await signInAnonymously(auth); }

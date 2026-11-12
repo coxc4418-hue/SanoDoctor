@@ -1,7 +1,7 @@
 // Sano Doctor — Configuración del consultorio
 import { store, updateTenant, DEFAULT_RX_NOTE, DAYS } from '../store.js';
 import { requirePin, changePassword, authErrorMessage, session } from '../auth.js';
-import { esc, num, toast, parseNum, setBusy, toggleTheme, download, nowISO, round2, openModal, shortId, compressImage, confirmDialog, emptyState } from '../utils.js';
+import { esc, num, toast, parseNum, setBusy, toggleTheme, download, nowISO, round2, openModal, shortId, compressImage, confirmDialog, emptyState, bs, loc } from '../utils.js';
 import { icon } from '../icons.js';
 import { openRateModal, salesWa, SALES_PHONE_FMT } from '../shared.js';
 import { isStandalone, bindInstallButtons } from '../install.js';
@@ -35,7 +35,7 @@ export function mount(el, { params = {} }) {
         </div>
         <div class="row" style="justify-content:flex-end"><button class="btn btn-primary">${icon('check')} Guardar</button></div>
       </form>
-      <div class="card mt-lg between row-wrap"><div><div class="bold">Tasa del día: Bs ${num(store.rate)} por $1</div><div class="small muted">${s().rateAuto !== false ? 'Se actualiza automáticamente con la tasa oficial BCV cada día.' : 'Tasa manual.'}</div></div><button class="btn btn-secondary" id="s-rate">${icon('refresh')} Cambiar tasa</button></div>
+      <div class="card mt-lg between row-wrap bs-only"><div><div class="bold">Tasa del día: ${bs(store.rate)} por $1</div><div class="small muted">${s().rateAuto !== false ? 'Se actualiza automáticamente con la tasa oficial BCV cada día.' : 'Tasa manual.'}</div></div><button class="btn btn-secondary" id="s-rate">${icon('refresh')} Cambiar tasa</button></div>
       <div class="card mt-lg between row-wrap"><div><div class="bold">Tema de la aplicación</div><div class="small muted">Claro u oscuro, según tu preferencia.</div></div><button class="btn btn-secondary" id="s-theme">${icon(document.documentElement.dataset.theme === 'dark' ? 'sun' : 'moon')} Cambiar tema</button></div>`;
       $('#f-biz').onsubmit = async (e) => {
         e.preventDefault(); const F = e.target.elements;
@@ -99,7 +99,7 @@ export function mount(el, { params = {} }) {
       const svcs = s().services || [];
       body.innerHTML = `<div class="stack">
         <div class="card stack"><div class="card-title">${icon('dollar')} Servicios y precios</div><p class="small muted" style="margin:0">La consulta se carga automáticamente según el tipo de cita (primera vez, control, emergencia…). Los demás servicios se agregan en la consulta o desde “Cobrar”. El precio se puede ajustar en cada cobro.</p>
-          <div class="stack-sm" id="svc-list">${svcs.map((x, i) => `<div class="row"><input class="input" data-sn="${i}" value="${esc(x.name)}"><div class="input-group" style="width:130px;flex:none"><span class="prefix">$</span><input class="input" data-sp="${i}" inputmode="decimal" value="${num(x.price)}"></div><button class="btn btn-ghost btn-icon" data-srm="${i}" aria-label="Quitar">${icon('trash')}</button></div>`).join('')}</div>
+          <div class="stack-sm" id="svc-list">${svcs.map((x, i) => `<div class="row"><input class="input" data-sn="${i}" value="${esc(x.name)}"><div class="input-group" style="width:130px;flex:none"><span class="prefix">${esc(loc().sym)}</span><input class="input" data-sp="${i}" inputmode="decimal" value="${num(x.price)}"></div><button class="btn btn-ghost btn-icon" data-srm="${i}" aria-label="Quitar">${icon('trash')}</button></div>`).join('')}</div>
           <div class="row row-wrap"><button class="btn btn-secondary" id="svc-add">${icon('plus')} Agregar servicio</button><span class="grow"></span><button class="btn btn-primary" id="svc-save">${icon('check')} Guardar servicios</button></div></div>
         ${listEditor('categories', 'Categorías de insumos y medicinas', 'Ej.: Antibióticos', s().categories || [])}
       </div>`;

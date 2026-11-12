@@ -1,6 +1,6 @@
 // Sano Doctor — Componentes compartidos: tasa BCV, moneda, QR, WhatsApp al paciente e impresión de recibos
 import { store, APPT_TYPES } from './store.js';
-import { openModal, toast, num, esc, parseNum, fmtDateTime, fmtDate, setBusy, usd, bs, methodLabel, qtyFmt, printHTML, todayKey, dayKey, waLink, addDays } from './utils.js';
+import { openModal, toast, num, esc, parseNum, fmtDateTime, fmtDate, setBusy, usd, bs, methodLabel, qtyFmt, printHTML, todayKey, dayKey, waLink, addDays, isVE } from './utils.js';
 import { icon } from './icons.js';
 
 export const APP_NAME = 'Sano Doctor';
@@ -26,6 +26,7 @@ export async function fetchBcvRate() {
 }
 
 export async function autoUpdateRate() {
+  if (!isVE()) return false;
   const s = store.settings;
   if (s.rateAuto === false) return false;
   if (s.rateUpdatedAt && dayKey(new Date(s.rateUpdatedAt)) === todayKey() && store.rate > 0) return false;
@@ -33,12 +34,13 @@ export async function autoUpdateRate() {
     const r = await fetchBcvRate();
     if (Math.abs(r.rate - store.rate) < 0.0001 && s.rateUpdatedAt && dayKey(new Date(s.rateUpdatedAt)) === todayKey()) return false;
     await store.setRate(Math.round(r.rate * 100) / 100, true);
-    toast(`Tasa BCV del día actualizada: Bs ${num(r.rate)}`, 'info', 4000);
+    toast(`Tasa BCV del día actualizada: ${bs(r.rate)}`, 'info', 4000);
     return true;
   } catch (_) { return false; }
 }
 
 export function openRateModal() {
+  if (!isVE()) { import('./country.js').then((m) => m.openCountryPicker()); return; }
   const s = store.settings;
   const m = openModal({
     title: 'Tasa del día',
@@ -75,7 +77,7 @@ export function openRateModal() {
     if (!(v > 0)) { toast('Ingresa una tasa válida', 'warning'); input.focus(); return; }
     await store.saveSettings({ rateAuto: m.el.querySelector('[data-autoflag]').checked });
     await store.setRate(v, false);
-    toast(`Tasa actualizada: Bs ${num(v)} por $1`);
+    toast(`Tasa actualizada: ${bs(v)} por $1`);
     m.close();
   };
   m.el.querySelector('[data-f]').onsubmit = save;
@@ -140,7 +142,7 @@ export function patientMessage(kind, { patient = {}, appt = null, consult = null
     control: () => `${h}\n\nYa es momento de tu *control médico*${patient.lastDiagnoses?.length ? ` (${patient.lastDiagnoses[0]})` : ''}. ¿Te agendamos una cita? Responde con el día que te quede mejor.`,
     cumple: () => `🎉 ¡Feliz cumpleaños, ${name}! 🎂\n\nDe parte de todo el equipo de *${biz}* te deseamos un año lleno de salud y bienestar. ¡Cuídate mucho!`,
     indicaciones: () => `${h}\n\nEstas son tus indicaciones de la consulta ${consult?.number || ''}:\n\n${(consult?.rx || []).map((r, i) => `${i + 1}. *${r.name}* ${r.presentation || ''}: ${[r.dose, r.frequency, r.duration && `por ${r.duration}`].filter(Boolean).join(', ')}${r.note ? ` (${r.note})` : ''}`).join('\n') || '—'}${consult?.indications ? `\n\n${consult.indications}` : ''}${consult?.nextVisit?.date ? `\n\n📅 Control: ${fmtDate(consult.nextVisit.date)} a las ${consult.nextVisit.time}` : ''}\n\nCualquier duda, escríbenos. ¡Que te mejores!`,
-    cobro: () => `${h}\n\nTe recordamos que tienes un saldo pendiente de *$${num(extra)}* (Bs ${num(Number(extra) * store.rate)}) por tu consulta ${consult?.number || ''}. ¡Gracias!`,
+    cobro: () => `${h}\n\nTe recordamos que tienes un saldo pendiente de *${usd(extra)}*${bs(Number(extra) * store.rate) ? ` (${bs(Number(extra) * store.rate)})` : ''} por tu consulta ${consult?.number || ''}. ¡Gracias!`,
     libre: () => `${h}\n\n${extra || ''}`
   };
   return (T[kind] || T.libre)();
@@ -178,7 +180,7 @@ export function receiptHTML(sale) {
   const rate = sale.rate || store.rate;
   const ivaPct = Number(s.iva) || 0;
   const ivaBs = ivaPct > 0 ? (sale.total - sale.total / (1 + ivaPct / 100)) * rate : 0;
-  const pays = (sale.payments || []).map((p) => `<tr><td colspan="2">${esc(methodLabel(p.method))}</td><td class="r">${p.currency === 'BS' ? 'Bs ' + num(p.amount) : '$' + num(p.amount)}</td></tr>`).join('');
+  const pays = (sale.payments || []).map((p) => `<tr><td colspan="2">${esc(methodLabel(p.method))}</td><td class="r">${p.currency === 'BS' ? bs(p.amount) : usd(p.amount)}</td></tr>`).join('');
   return `<!DOCTYPE html><html><head>${PRINT_HEAD}<title>${esc(sale.number)}</title><style>${ticketCSS(s.receiptFormat)}</style></head><body>
     ${headerHTML()}
     <div class="hr"></div>
@@ -190,18 +192,18 @@ export function receiptHTML(sale) {
     ${sale.consultationNumber ? `<div>Consulta: ${esc(sale.consultationNumber)}${sale.doctor ? ' · ' + esc(sale.doctor) : ''}</div>` : ''}
     ${sale.status === 'voided' ? '<div class="c b">*** DOCUMENTO ANULADO ***</div>' : ''}
     <div class="hr"></div>
-    <table>${(sale.items || []).map((it) => `<tr><td colspan="2" style="padding-top:3px">${qtyFmt(it.qty)} x ${esc(it.name)}</td><td class="r">$${num(it.total ?? it.price * it.qty)}</td></tr>`).join('')}</table>
+    <table>${(sale.items || []).map((it) => `<tr><td colspan="2" style="padding-top:3px">${qtyFmt(it.qty)} x ${esc(it.name)}</td><td class="r">${usd(it.total ?? it.price * it.qty)}</td></tr>`).join('')}</table>
     <div class="hr"></div>
     <table>
-      <tr><td colspan="2">Subtotal</td><td class="r">$${num(sale.subtotal)}</td></tr>
-      ${sale.discount > 0 ? `<tr><td colspan="2">Descuento</td><td class="r">-$${num(sale.discount)}</td></tr>` : ''}
-      <tr class="big"><td colspan="2">TOTAL $</td><td class="r">$${num(sale.total)}</td></tr>
-      <tr class="big"><td colspan="2">TOTAL Bs</td><td class="r">${num(sale.total * rate)}</td></tr>
-      <tr><td colspan="3" class="sm">Tasa: Bs ${num(rate)} por $</td></tr>
-      ${ivaBs > 0.009 ? `<tr><td colspan="2">IVA ${num(ivaPct, 0)}% incluido</td><td class="r">Bs ${num(ivaBs)}</td></tr>` : ''}
+      <tr><td colspan="2">Subtotal</td><td class="r">${usd(sale.subtotal)}</td></tr>
+      ${sale.discount > 0 ? `<tr><td colspan="2">Descuento</td><td class="r">-${usd(sale.discount)}</td></tr>` : ''}
+      <tr class="big"><td colspan="2">TOTAL $</td><td class="r">${usd(sale.total)}</td></tr>
+      ${isVE() ? `<tr class="big"><td colspan="2">TOTAL Bs</td><td class="r">${num(sale.total * rate)}</td></tr>` : ''}
+      ${isVE() ? `<tr><td colspan="3" class="sm">Tasa: ${bs(rate)} por $</td></tr>` : ''}
+      ${ivaBs > 0.009 ? `<tr><td colspan="2">IVA ${num(ivaPct, 0)}% incluido</td><td class="r">${bs(ivaBs)}</td></tr>` : ''}
     </table>
     ${pays ? `<div class="hr"></div><table>${pays}</table>` : ''}
-    ${sale.changeUSD > 0.009 ? `<div>Vuelto: ${sale.changeCurrency === 'BS' ? 'Bs ' + num(sale.changeUSD * rate) : '$' + num(sale.changeUSD)}</div>` : ''}
+    ${sale.changeUSD > 0.009 ? `<div>Vuelto: ${sale.changeCurrency === 'BS' ? bs(sale.changeUSD * rate) : usd(sale.changeUSD)}</div>` : ''}
     ${sale.note ? `<div>Nota: ${esc(sale.note)}</div>` : ''}
     <div class="hr"></div>
     <div class="c">${esc(s.receiptFooter || '¡Gracias por su confianza!')}</div>

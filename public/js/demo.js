@@ -276,18 +276,18 @@ export async function purgeTenant(tenantId, onlyDemo = true) {
   try {
     const cons = await getDocs(collection(db, 'tenants', tenantId, 'consultations'));
     const codes = cons.docs.flatMap((d) => (d.data().docs || []).map((x) => x.code)).filter(Boolean);
-    for (let i = 0; i < codes.length; i += 400) {
+    for (let i = 0; i < codes.length; i += 80) {
       const b = writeBatch(db);
-      codes.slice(i, i + 400).forEach((c) => b.delete(doc(db, 'verify', c)));
+      codes.slice(i, i + 80).forEach((c) => b.delete(doc(db, 'verify', c)));
       await b.commit().catch((e) => console.warn('[purge] verificación', e?.code || e));
     }
   } catch (e) { console.warn('[purge] verificación', e?.code || e); }
   for (const c of DATA_COLLECTIONS) {
     try {
       const snap = await getDocs(collection(db, 'tenants', tenantId, c));
-      for (let i = 0; i < snap.docs.length; i += 400) {
+      for (let i = 0; i < snap.docs.length; i += 80) {
         const b = writeBatch(db);
-        snap.docs.slice(i, i + 400).forEach((d) => b.delete(d.ref));
+        snap.docs.slice(i, i + 80).forEach((d) => b.delete(d.ref));
         await b.commit();
       }
     } catch (e) { console.warn('[purge]', c, e?.code || e); }

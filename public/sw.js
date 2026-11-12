@@ -1,5 +1,5 @@
 // Sano Doctor — Service Worker (PWA, funcionamiento sin conexión)
-const VERSION = 'sanodoctor-v1.0.1';
+const VERSION = 'sanodoctor-v1.0.2';
 const SDK = 'https://www.gstatic.com/firebasejs/10.14.1/';
 const VIEWS = ['dashboard', 'agenda', 'patients', 'consultations', 'pos', 'invoices', 'cash', 'inventory', 'reports', 'settings', 'admin', 'search', 'verify'];
 const SHELL = [
